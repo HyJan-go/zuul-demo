@@ -1,0 +1,30 @@
+server:
+  port: 8600
+spring:
+  application:
+    name: zuul-proxy
+eureka: # eureka 现在已经不维护了，consul, nacos 替换
+  client:
+    register-with-eureka: true  # 注册到服务端
+    fetch-registry: true  # 多个eureka相互同步信息
+    service-url:
+      defaultZone: http://localhost:8001/eureka/    # eureka 服务端地址
+# 这里我们将匹配/userService/**的请求路由到user-service服务上去，匹配/feignService/**的请求路由到feign-service上去。默认是驼峰换中-
+zuul:  # zuul 配置
+  routes:
+    user-service:
+      path: /userService/**
+    feign-service:
+      path: /feignService/**
+#    ignored-services: user-service,feign-service #关闭默认路由配置
+#    prefix: /proxy #给网关路由添加前缀
+  sensitive-headers: Cookie,Set-Cookie,Authorization #配置过滤敏感的请求头信息，设置为空就不会过滤
+  add-host-header: true #设置为true重定向是会添加host请求头
+  PreLogFilter:
+    pre:
+      disable: true #控制是否启用过滤器
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'routes'
